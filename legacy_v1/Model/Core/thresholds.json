@@ -1,0 +1,4 @@
+{
+  "sentinel_threshold": 0.34,
+  "confirm_threshold": 0.51
+}
