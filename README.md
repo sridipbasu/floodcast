@@ -35,26 +35,27 @@ The result: NSE improves from **0.43 → 0.92** on the streamflow delta predicti
 
 ## Architecture
 
-Daily features (15-day window)
-│
-▼
-┌─────────────┐
-│ 2-layer │ 32 dynamic features
-│ LSTM │ hidden_size = 256
-│ (856k params) │
-└──────┬──────┘
-│ prediction + 256-dim hidden state
-▼
-residual = actual − LSTM_pred
-│
-▼
-┌─────────────┐
-│ XGBoost │ 298-dim input
-│ Corrector │ (42 features + 256 hidden state)
-└──────┬──────┘
-│
-▼
-final = LSTM_pred + XGBoost_correction
+```mermaid
+flowchart TD
+    A[🌧️ Daily Features\n15-day sliding window] --> B
+
+    subgraph LSTM [" Stage 1 — LSTM "]
+        B["2-Layer LSTM\n32 dynamic features · hidden_size=256\n856k parameters"]
+        B --> C[LSTM Prediction]
+        B --> D[256-dim Hidden State]
+    end
+
+    C --> E["residual = actual − LSTM_pred"]
+    D --> F
+
+    subgraph XGB [" Stage 2 — XGBoost Corrector "]
+        F["XGBoost\n298-dim input\n42 features + 256 hidden state"]
+        F --> G[Residual Correction]
+    end
+
+    C --> H
+    G --> H["✅ Final = LSTM_pred + XGBoost_correction"]
+```
 
 
 
@@ -106,36 +107,36 @@ All Yeo-Johnson transformers are **fit exclusively on the training set** to prev
 | Rising (0.5–2.0) | 68,693 | 0.423 | 0.982 | **+0.558** |
 | Flood peak (delta > 2.0) | 26,962 | 0.417 | 0.915 | **+0.498** |
 
----
-
 ## Project Structure
-floodcast/
-│
-├── notebook/
-│ └── streamflow-pred-nb.ipynb # Full training pipeline (Kaggle)
-│
-├── models/
-│ ├── best_flood_lstm.pt # Trained LSTM checkpoint
-│ ├── flood_xgb_corrector.json # Trained XGBoost corrector
-│ └── model_config.json # Hyperparameters & feature config
-│
-├── scalers/
-│ ├── feature_scaler.pkl # Input feature scaler
-│ ├── mm_scaler.pkl # MinMax scaler
-│ ├── target_scaler.pkl # Target (delta) inverse-transform scaler
-│ └── yj_transformer.pkl # Yeo-Johnson transformer (train-fit only)
-│
-├── src/
-│ ├── flood_lstm.py # LSTM model class definition
-│ └── predictor.py # End-to-end inference script
-│
-├── data/
-│ ├── gauges_info.csv # Station metadata (367 gauges)
-│ ├── discharge_24March.csv # Sample discharge data
-│ └── sample_io.json # Example model input/output payload
-│
-├── requirements.txt
-└── README.md
+
+```mermaid
+flowchart LR
+    A[🗂️ floodcast/] --> B[📓 notebook/]
+    A --> C[🤖 models/]
+    A --> D[⚖️ scalers/]
+    A --> E[🐍 src/]
+    A --> F[📊 data/]
+    A --> G[📄 requirements.txt]
+    A --> H[📄 README.md]
+
+    B --> B1[streamflow-pred-nb.ipynb\nFull training pipeline on Kaggle]
+
+    C --> C1[best_flood_lstm.pt\nTrained LSTM checkpoint]
+    C --> C2[flood_xgb_corrector.json\nTrained XGBoost corrector]
+    C --> C3[model_config.json\nHyperparameters & feature config]
+
+    D --> D1[feature_scaler.pkl\nInput feature scaler]
+    D --> D2[mm_scaler.pkl\nMinMax scaler]
+    D --> D3[target_scaler.pkl\nTarget delta inverse-transform]
+    D --> D4[yj_transformer.pkl\nYeo-Johnson — train-fit only]
+
+    E --> E1[flood_lstm.py\nLSTM model class definition]
+    E --> E2[predictor.py\nEnd-to-end inference script]
+
+    F --> F1[gauges_info.csv\n367 station metadata]
+    F --> F2[discharge_24March.csv\nSample discharge data]
+    F --> F3[sample_io.json\nExample input/output payload]
+```
 
 
 ---
