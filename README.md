@@ -156,7 +156,7 @@ flowchart LR
 
 ## Stack
 
-`Python` · `PyTorch` · `XGBoost` · `HydroATLAS` · `Pandas` · `NumPy` · `Scikit-learn` · `Kaggle (2× T4 GPU)`
+`Python` · `PyTorch` · `XGBoost`  · `Pandas` · `NumPy` · `Scikit-learn` · `Kaggle (2× T4 GPU)`
 
 ---
 
