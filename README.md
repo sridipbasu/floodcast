@@ -125,20 +125,6 @@ floodcast/
 └── README.md
 ```
 
----
-
-## Roadmap
-
-- [x] LSTM baseline for streamflow delta forecasting  
-- [x] XGBoost residual corrector (two-stage hybrid)  
-- [x] Hydrological evaluation (KGE, LogNSE, PBIAS, PPE)  
-- [x] Per-station and per-regime breakdown  
-- [ ] Google Earth Engine integration  
-- [ ] Real-time inference pipeline  
-- [ ] Flood alert dashboard  
-
----
-
 ## Stack
 
 `Python` · `PyTorch` · `XGBoost` · `Pandas` · `NumPy` · `Scikit-learn` · `Kaggle (2× T4 GPU)`
@@ -151,5 +137,3 @@ This project was jointly developed by **Sridip Basu** and **Harsh Jain**.
 Harsh Jain's GitHub: https://github.com/harsh-f9
 
 ---
-
-*Built as part of an ongoing effort toward real-time riverine flood early warning.*
