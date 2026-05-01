@@ -1,19 +1,21 @@
 # 🌊 floodcast
 
-> A two-stage hybrid ML pipeline for daily riverine streamflow forecasting,
+> A two-stage hybrid ML pipeline for daily riverine streamflow forecasting,  
 > built toward real-time flood early warning across 367 river basins.
 
 ---
 
 ## What This Is
 
-Most rivers are boring 95% of the time. A flood peak the kind that displaces communities and costs lives is statistically rare. That's the core problem with training a single neural network on river data: it learns to be "average-correct" and consistently undershoots the extreme events that actually matter.
+Most rivers are uneventful 95% of the time. Flood peaks—the ones that actually matter—are rare.  
+A single neural network trained on such data tends to become “average-correct” and consistently underpredict extreme events.
 
-**floodcast** solves this with a residual learning architecture:
-- A **2-layer LSTM** learns the temporal rhythm of each river from 15-day sequences of rainfall, soil saturation, and upstream flow signals
-- An **XGBoost corrector** then sees exactly what the LSTM got wrong and fixes it using physical basin geography slope, land cover, upstream area, routing lags
+**floodcast** addresses this using a residual learning architecture:
 
-The result: NSE improves from **0.43 → 0.92** on the streamflow delta prediction task. All 367 test stations achieve NSE > 0.96.
+- A **2-layer LSTM** learns temporal dynamics from 15-day sequences of rainfall, soil saturation, and upstream flow  
+- An **XGBoost corrector** models the residual errors using physical basin features (slope, land cover, upstream area, routing lags)
+
+**Result:** NSE improves from **0.43 → 0.92** on delta prediction, with all 367 stations achieving NSE > 0.96.
 
 ---
 
@@ -30,41 +32,29 @@ The result: NSE improves from **0.43 → 0.92** on the streamflow delta predicti
 | Worst station NSE | — | **0.9669** |
 | Flood peak error (PPE, top 5%) | — | **0.69%** |
 
-
 ---
 
 ## Architecture
 
-```mermaid
-flowchart TD
-    A[🌧️ Daily Features\n15-day sliding window] --> B
+A two-stage residual pipeline:
 
-    subgraph LSTM [" Stage 1 — LSTM "]
-        B["2-Layer LSTM\n32 dynamic features · hidden_size=256\n856k parameters"]
-        B --> C[LSTM Prediction]
-        B --> D[256-dim Hidden State]
-    end
+1. **LSTM (Stage 1)**  
+   - Input: 15-day sliding window of dynamic features  
+   - Learns temporal dependencies  
+   - Outputs baseline streamflow prediction + hidden state  
 
-    C --> E["residual = actual − LSTM_pred"]
-    D --> F
+2. **XGBoost (Stage 2)**  
+   - Input: LSTM hidden state + engineered physical features  
+   - Learns residual errors (actual − LSTM prediction)  
+   - Produces correction term  
 
-    subgraph XGB [" Stage 2 — XGBoost Corrector "]
-        F["XGBoost\n298-dim input\n42 features + 256 hidden state"]
-        F --> G[Residual Correction]
-    end
-
-    C --> H
-    G --> H["✅ Final = LSTM_pred + XGBoost_correction"]
-```
-
-
+**Final Prediction = LSTM Output + XGBoost Correction**
 
 ---
 
 ## Dataset
-Created on kaggle
 
-
+Created and processed on Kaggle.
 
 ---
 
@@ -90,12 +80,12 @@ All Yeo-Johnson transformers are **fit exclusively on the training set** to prev
 |---|---|
 | Optimizer | AdamW (`lr=2e-3`, `weight_decay=1e-3`) |
 | LR Schedule | OneCycleLR (30% warmup → cosine decay) |
-| Loss | Composite: 60% Huber (δ=1.0) + 40% MAE, inverse-magnitude weighted |
+| Loss | 60% Huber (δ=1.0) + 40% MAE (inverse-magnitude weighted) |
 | Precision | Mixed precision (AMP) |
 | Gradient clipping | max norm = 1.0 |
-| Early stopping | patience = 10 (after warmup) |
-| Hardware | 2× Tesla T4 GPU, DataParallel |
-| LSTM best epoch | Epoch 4 / 16 |
+| Early stopping | patience = 10 |
+| Hardware | 2× Tesla T4 GPU |
+| LSTM best epoch | 4 / 16 |
 | XGBoost best iteration | 313 / 1000 |
 
 ---
@@ -108,58 +98,62 @@ All Yeo-Johnson transformers are **fit exclusively on the training set** to prev
 | Rising (0.5–2.0) | 68,693 | 0.423 | 0.982 | **+0.558** |
 | Flood peak (delta > 2.0) | 26,962 | 0.417 | 0.915 | **+0.498** |
 
-## Project Structure
-
 ---
+
+## Project Structure
 floodcast/
 │
 ├── notebook/
-│   └── streamflow-pred-nb.ipynb   # Full training pipeline (Kaggle)
+│ └── streamflow-pred-nb.ipynb # Full training pipeline (Kaggle)
 │
 ├── models/
-│   ├── best_flood_lstm.pt         # Trained LSTM checkpoint
-│   ├── flood_xgb_corrector.json   # XGBoost residual model
-│   └── model_config.json          # Hyperparameters & feature config
+│ ├── best_flood_lstm.pt # Trained LSTM checkpoint
+│ ├── flood_xgb_corrector.json # XGBoost residual model
+│ └── model_config.json # Hyperparameters & feature config
 │
 ├── scalers/
-│   ├── feature_scaler.pkl
-│   ├── mm_scaler.pkl
-│   ├── target_scaler.pkl
-│   └── yj_transformer.pkl
+│ ├── feature_scaler.pkl
+│ ├── mm_scaler.pkl
+│ ├── target_scaler.pkl
+│ └── yj_transformer.pkl
 │
 ├── src/
-│   ├── flood_lstm.py              # Model definition
-│   └── predictor.py               # End-to-end inference
+│ ├── flood_lstm.py # Model definition
+│ └── predictor.py # End-to-end inference
 │
 ├── data/
-│   ├── gauges_info.csv            # Station metadata (367 gauges)
-│   └── discharge_24March.csv      # Sample data
+│ ├── gauges_info.csv # Station metadata (367 gauges)
+│ └── discharge_24March.csv # Sample data
 │
-├── sample_io.json                 # Example input/output
+├── sample_io.json # Example input/output
 ├── requirements.txt
 └── README.md
-
 
 ---
 
 ## Roadmap
 
-- [x] LSTM baseline for streamflow delta forecasting
-- [x] XGBoost residual corrector (two-stage hybrid)
-- [x] Extended hydrological evaluation (KGE, LogNSE, PBIAS, PPE)
-- [x] Per-station and per-regime performance breakdown
-- [ ] Google Earth Engine integration for live satellite data
-- [ ] Real-time inference pipeline
-- [ ] Flood alert threshold dashboard
+- [x] LSTM baseline for streamflow delta forecasting  
+- [x] XGBoost residual corrector (two-stage hybrid)  
+- [x] Hydrological evaluation (KGE, LogNSE, PBIAS, PPE)  
+- [x] Per-station and per-regime breakdown  
+- [ ] Google Earth Engine integration  
+- [ ] Real-time inference pipeline  
+- [ ] Flood alert dashboard  
 
 ---
 
 ## Stack
 
-`Python` · `PyTorch` · `XGBoost`  · `Pandas` · `NumPy` · `Scikit-learn` · `Kaggle (2× T4 GPU)`
+`Python` · `PyTorch` · `XGBoost` · `Pandas` · `NumPy` · `Scikit-learn` · `Kaggle (2× T4 GPU)`
 
 ---
 
+## Contributors
 
+This project was jointly developed by **Sridip Basu** and **Harsh Jain**.  
+Harsh Jain’s GitHub: https://github.com/harsh-f9
 
-*Built as part of an ongoing project toward real-time riverine flood early warning.*
+---
+
+*Built as part of an ongoing effort toward real-time riverine flood early warning.*
