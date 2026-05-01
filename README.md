@@ -1,5 +1,4 @@
 # 🌊 floodcast
-
 > A two-stage hybrid ML pipeline for daily riverine streamflow forecasting,  
 > built toward real-time flood early warning across 367 river basins.
 
@@ -8,7 +7,7 @@
 ## What This Is
 
 Most rivers are uneventful 95% of the time. Flood peaks—the ones that actually matter—are rare.  
-A single neural network trained on such data tends to become “average-correct” and consistently underpredict extreme events.
+A single neural network trained on such data tends to become "average-correct" and consistently underpredict extreme events.
 
 **floodcast** addresses this using a residual learning architecture:
 
@@ -101,33 +100,30 @@ All Yeo-Johnson transformers are **fit exclusively on the training set** to prev
 ---
 
 ## Project Structure
+
+```
 floodcast/
-│
 ├── notebook/
-│ └── streamflow-pred-nb.ipynb # Full training pipeline (Kaggle)
-│
+│   └── streamflow-pred-nb.ipynb   # Full training pipeline (Kaggle)
 ├── models/
-│ ├── best_flood_lstm.pt # Trained LSTM checkpoint
-│ ├── flood_xgb_corrector.json # XGBoost residual model
-│ └── model_config.json # Hyperparameters & feature config
-│
+│   ├── best_flood_lstm.pt          # Trained LSTM checkpoint
+│   ├── flood_xgb_corrector.json    # XGBoost residual model
+│   └── model_config.json           # Hyperparameters & feature config
 ├── scalers/
-│ ├── feature_scaler.pkl
-│ ├── mm_scaler.pkl
-│ ├── target_scaler.pkl
-│ └── yj_transformer.pkl
-│
+│   ├── feature_scaler.pkl
+│   ├── mm_scaler.pkl
+│   ├── target_scaler.pkl
+│   └── yj_transformer.pkl
 ├── src/
-│ ├── flood_lstm.py # Model definition
-│ └── predictor.py # End-to-end inference
-│
+│   ├── flood_lstm.py               # Model definition
+│   └── predictor.py                # End-to-end inference
 ├── data/
-│ ├── gauges_info.csv # Station metadata (367 gauges)
-│ └── discharge_24March.csv # Sample data
-│
-├── sample_io.json # Example input/output
+│   ├── gauges_info.csv             # Station metadata (367 gauges)
+│   └── discharge_24March.csv       # Sample data
+├── sample_io.json                  # Example input/output
 ├── requirements.txt
 └── README.md
+```
 
 ---
 
@@ -152,7 +148,7 @@ floodcast/
 ## Contributors
 
 This project was jointly developed by **Sridip Basu** and **Harsh Jain**.  
-Harsh Jain’s GitHub: https://github.com/harsh-f9
+Harsh Jain's GitHub: https://github.com/harsh-f9
 
 ---
 
