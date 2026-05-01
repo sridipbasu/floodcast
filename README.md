@@ -110,34 +110,34 @@ All Yeo-Johnson transformers are **fit exclusively on the training set** to prev
 
 ## Project Structure
 
-```mermaid
-flowchart LR
-    A[🗂️ floodcast/] --> B[📓 notebook/]
-    A --> C[🤖 models/]
-    A --> D[⚖️ scalers/]
-    A --> E[🐍 src/]
-    A --> F[📊 data/]
-    A --> G[📄 requirements.txt]
-    A --> H[📄 README.md]
-
-    B --> B1[streamflow-pred-nb.ipynb\nFull training pipeline on Kaggle]
-
-    C --> C1[best_flood_lstm.pt\nTrained LSTM checkpoint]
-    C --> C2[flood_xgb_corrector.json\nTrained XGBoost corrector]
-    C --> C3[model_config.json\nHyperparameters & feature config]
-
-    D --> D1[feature_scaler.pkl\nInput feature scaler]
-    D --> D2[mm_scaler.pkl\nMinMax scaler]
-    D --> D3[target_scaler.pkl\nTarget delta inverse-transform]
-    D --> D4[yj_transformer.pkl\nYeo-Johnson — train-fit only]
-
-    E --> E1[flood_lstm.py\nLSTM model class definition]
-    E --> E2[predictor.py\nEnd-to-end inference script]
-
-    F --> F1[gauges_info.csv\n367 station metadata]
-    F --> F2[discharge_24March.csv\nSample discharge data]
-    F --> F3[sample_io.json\nExample input/output payload]
-```
+---
+floodcast/
+│
+├── notebook/
+│   └── streamflow-pred-nb.ipynb   # Full training pipeline (Kaggle)
+│
+├── models/
+│   ├── best_flood_lstm.pt         # Trained LSTM checkpoint
+│   ├── flood_xgb_corrector.json   # XGBoost residual model
+│   └── model_config.json          # Hyperparameters & feature config
+│
+├── scalers/
+│   ├── feature_scaler.pkl
+│   ├── mm_scaler.pkl
+│   ├── target_scaler.pkl
+│   └── yj_transformer.pkl
+│
+├── src/
+│   ├── flood_lstm.py              # Model definition
+│   └── predictor.py               # End-to-end inference
+│
+├── data/
+│   ├── gauges_info.csv            # Station metadata (367 gauges)
+│   └── discharge_24March.csv      # Sample data
+│
+├── sample_io.json                 # Example input/output
+├── requirements.txt
+└── README.md
 
 
 ---
