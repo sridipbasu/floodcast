@@ -118,9 +118,9 @@ floodcast/
 │   ├── flood_lstm.py               # Model definition
 │   └── predictor.py                # End-to-end inference
 ├── data/
-│   ├── gauges_info.csv             # Station metadata (367 gauges)
-│   └── discharge_24March.csv       # Sample data
-├── sample_io.json                  # Example input/output
+│   ├── Please Refer Kaggle         #Dataset would be updated soon!
+│
+|   ├── sample_io.json                  # Example input/output
 ├── requirements.txt
 └── README.md
 ```
